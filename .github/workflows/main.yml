@@ -1,36 +1,21 @@
-name: Automação Diária Briefing
-on:
-  schedule:
-    - cron: '0 17 * * 1-5'  # 17:00 UTC (14:00 Brasília)
-  workflow_dispatch:
+name: CI
 
-env:
-  TZ: 'America/Sao_Paulo'
+on:
+  push:
+    branches:
+      - main
 
 jobs:
-  run-script:
+  build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
-      
-      - name: Instalar Dependências
-        run: pip install selenium webdriver-manager
-      
-      - name: Executar Automação
-        run: python main.py
-      
-      - name: Salvar Relatório Semanal
-        run: |
-          git config --global user.name "Robo do Briefing"
-          git config --global user.email "robo@github.com"
-          git add RELATORIO_SEMANAL.md || true
-          git commit -m "📝 Atualizando relatório semanal [skip ci]" || true
-          git push origin main
+          python-version: '3.8'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest
