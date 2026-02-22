@@ -1,21 +1,48 @@
-name: CI
+name: Automação Diária Briefing Safety
 
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    # Roda às 14:00 (Brasília) de Segunda a Sexta
+    # Terça-feira (1) a Sábado (6), às 17:00 UTC (= 14:00 Brasília em horário de verão)
+    - cron: '0 17 * * 1-5'
+  
+  # Permite disparo manual via GitHub UI
+  workflow_dispatch:
 
 jobs:
-  build:
+  automacao-briefing:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      # 1. Faz checkout do código
+      - name: Checkout repositório
+        uses: actions/checkout@v3
+      
+      # 2. Configura Python
+      - name: Configurar Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.8'
-      - name: Install dependencies
+          python-version: '3.11'
+      
+      # 3. Instala as dependências
+      - name: Instalar dependências
         run: pip install -r requirements.txt
-      - name: Run tests
-        run: pytest
+      
+      # 4. Executa a automação
+      - name: Executar automação Briefing Safety
+        run: python main.py
+        env:
+          BRIEFING_NOME: "Max Millian Matheus Pereira de Sales"
+          BRIEFING_PLACA: "qux5f90"
+          BRIEFING_URL: "https://forms.gle/PdgvP4GyG3UWWZYM9"
+      
+      # 5. Commit e push do relatório atualizado
+      - name: Commit e push do relatório
+        run: |
+          git config --global user.name "🤖 Robo Briefing Safety"
+          git config --global user.email "noreply@github.com"
+          git add RELATORIO_SEMANAL.md || true
+          git commit -m "📝 Atualizando relatório semanal [skip ci]" || true
+          git push
