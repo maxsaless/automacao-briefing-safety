@@ -1,48 +1,39 @@
 import os
-import time
 import logging
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.common.exceptions import WebDriverException, TimeoutException
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# Function to load environment variables
-def load_env_variables():
+def load_config():
+    """Load configuration from environment variables."""
     try:
-        # Load variables from .env file
-        from dotenv import load_dotenv
-        load_dotenv()
-        logger.info("Environment variables loaded successfully.")
+        config_value = os.getenv("CONFIG_VALUE")
+        if not config_value:
+            logging.warning("CONFIG_VALUE not set in environment variables.")
+        return config_value
     except Exception as e:
-        logger.error(f"Error loading environment variables: {e}")
-        raise
+        logging.error(f"Error loading configuration: {e}")
+        return None
 
-# Function to initialize the WebDriver with retry logic
-def init_driver(retries=3):
-    for attempt in range(retries):
-        try:
-            service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service)
-            logger.info("WebDriver initialized successfully.")
-            return driver
-        except WebDriverException as e:
-            logger.warning(f"WebDriver initialization failed: {e}. Retrying {attempt + 1}/{retries}...")
-            time.sleep(2)
-    logger.error("Failed to initialize WebDriver after retries.")
-    raise
-
-# Main function
-if __name__ == '__main__':
+def perform_task():
+    """Perform the main task of the application."""
     try:
-        load_env_variables()  # Load environment variables
-        driver = init_driver()  # Initialize the WebDriver
-        # Main logic goes here
-        # driver.get(os.getenv("URL"))
-        # Perform your operations...  
-        # driver.quit()
+        logging.info("Task started.")
+        # Simulated task logic
+        # e.g., result = complex_operation()
+        logging.info("Task completed successfully.")
     except Exception as e:
-        logger.critical(f"An unexpected error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
+
+def main():
+    """Main entry point of the application."""
+    logging.info("Application started.")
+    config = load_config()
+    if config is None:
+        logging.error("Failed to load configuration. Exiting.")
+        return
+    perform_task()
+    logging.info("Application finished.")
+
+if __name__ == "__main__":
+    main()
